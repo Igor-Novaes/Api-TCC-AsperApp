@@ -11,8 +11,8 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-require ('./app/controller/authController')(app);
-require ('./app/controller/taskController')(app);
+require ('./app/controller/index')(app);
+
 app.get("/", (req, res) => {
   res.json({ message: "" });
 });
