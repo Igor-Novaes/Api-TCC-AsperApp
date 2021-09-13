@@ -2,6 +2,7 @@ const express = require('express')
 const User = require('../models/User')
 const JWT = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
+const crypto = require ('crypto')
 
 const router = express.Router();
 
@@ -47,4 +48,31 @@ router.post('/login', async (req, res) =>{
          token: token({id: user.id}),
         })
      })
+
+router.post('/reset-password', async (req, res) =>{
+    const { email } = req.body;
+    try {
+        const user = await User.findOne({ email })
+
+        if(!user)
+        return res.status(400).send({erro: 'Usuario não encontrado'})
+
+        const token = crypto.randomBytes(20).toString('hex')
+        
+        const date = new Date();
+        date.setHours(date.getHours() + 1);
+
+        await User.findByIdAndUpdate(user.id, {
+            '$set':{
+                passwordResetToken: token,
+                passwordResetExpires: date,
+
+            }
+        });
+        console.log(token, date)
+    } catch (error) {
+        res.status(400).send({error: 'Erro ao recuperar senha, tente novamente'})
+    }
+
+})
 module.exports = app => app.use('/auth', router)
