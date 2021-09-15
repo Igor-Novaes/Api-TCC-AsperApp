@@ -73,7 +73,7 @@ router.post('/reset-password', async (req, res) =>{
         mailer.sendMail({
             to: email,
             from: 'igoroliveira-novaes@outlook.com',
-            template: 'forgot_password',
+            template: 'forgotpassword',
             context: { token },
         }, (err) =>{
             console.log(err)
@@ -83,8 +83,34 @@ router.post('/reset-password', async (req, res) =>{
             return res.send()
     })
     } catch (error) {
+        console.log(error)
         res.status(400).send({error: 'Erro ao recuperar senha, tente novamente'})
     }
 
 })
+router.post('/create-new-password', async (req, res) =>{
+    const { email, token, password } = req.body;
+
+    try {
+        const user = await User.findOne({ email })
+            .select('+passwordResetToken passwordResetExpires')
+        
+        if(token !== user.passwordResetToken)
+            return res.status(400).send({ erro: 'Token is invalid'})
+
+        const date = new Date()
+
+        if(date > user.passwordResetExpires)
+            return res.status(400).send({erro: 'Token expired, please generate a new token'})
+
+        user.password = password;
+        
+        await user.save()
+
+        res.send()
+    } catch (error) {
+        
+    }
+})
+
 module.exports = app => app.use('/auth', router)

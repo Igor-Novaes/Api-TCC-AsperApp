@@ -1,6 +1,5 @@
 const nodemailer = require('nodemailer');
 const path = require ('path');
-const teste = require('../app/resources/mail/auth/')
 const hbs = require('nodemailer-express-handlebars')
 const {host, port, user, pass}=  require ('../config/mailer.json')
 const transport = nodemailer.createTransport({
@@ -10,9 +9,15 @@ const transport = nodemailer.createTransport({
   });
 
   transport.use('compile', hbs({
-    viewEngine: 'handlebars',
-    viewPath: path.resolve('../app/resources/mail/auth/'),
+    viewEngine: {
+      partialsDir: 'some/path',
+      layoutsDir:'./app/resources/mail/auth/',
+      extName: '.html',
+      defaultLayout: false
+    },
     extName: '.html',
+    viewPath: './app/resources/mail/auth/'
+    
 
   }))
 
