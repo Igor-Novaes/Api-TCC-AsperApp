@@ -3,6 +3,7 @@ const User = require('../models/User')
 const JWT = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const crypto = require ('crypto')
+const mailer = require('../../modules/mailer')
 
 const router = express.Router();
 
@@ -69,7 +70,18 @@ router.post('/reset-password', async (req, res) =>{
 
             }
         });
-        console.log(token, date)
+        mailer.sendMail({
+            to: email,
+            from: 'igoroliveira-novaes@outlook.com',
+            template: 'forgot_password',
+            context: { token },
+        }, (err) =>{
+            console.log(err)
+            if(err)
+                return res.status(400).send({error: "houve um problema no envio do token"})
+
+            return res.send()
+    })
     } catch (error) {
         res.status(400).send({error: 'Erro ao recuperar senha, tente novamente'})
     }
